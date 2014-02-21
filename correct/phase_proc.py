@@ -943,7 +943,7 @@ def LP_solver_cylp(A_Matrix, B_vectors, weights, really_verbose=False):
 
 def phase_proc_lp(radar, offset, debug=False, self_const=60000.0,
                   low_z=10.0, high_z=53.0, min_phidp=0.01, min_ncp=0.5,
-                  min_rhv=0.8, fzl=4000.0, sys_phase=0.0,
+                  min_rhv=0.8, fzl=4000.0, sys_phase=0.0, dmin=None, doc=None,
                   overide_sys_phase=False, nowrap=None, really_verbose=False,
                   LP_solver='cylp', refl_field=None, ncp_field=None,
                   rhv_field=None, phidp_field=None, kdp_field=None,
@@ -1043,13 +1043,17 @@ def phase_proc_lp(radar, offset, debug=False, self_const=60000.0,
     if debug:
         print('Unfolding')
     my_unf = get_phidp_unf(radar, ncp_lev=min_ncp, rhohv_lev=min_rhv,
-                           debug=debug, ncpts=2, doc=None,
+                           debug=debug, ncpts=2, doc=doc,
                            sys_phase=sys_phase, nowrap=nowrap,
                            overide_sys_phase=overide_sys_phase,
                            refl_field=refl_field, ncp_field=ncp_field,
                            rhv_field=rhv_field, phidp_field=phidp_field)
     my_new_ph = copy.deepcopy(radar.fields[phidp_field])
     my_unf[:, -1] = my_unf[:, -2]
+    print("cutting off at dmin= ", dmin)
+	for isw in np.arange(0,dmin):
+    	my_unf[:,isw]=my_unf[:,dmin+1]
+
     my_new_ph['data'] = my_unf
     radar.fields.update({unf_field: my_new_ph})
 
